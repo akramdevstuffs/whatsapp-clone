@@ -4,13 +4,17 @@ import sendMessageIcon from "./../assets/send_message.png";
 import emojiIcon from "./../assets/emoji_icon.png";
 import voiceIcon from "./../assets/voice_icon.png";
 import attachFileIcon from "./../assets/attach_icon.png";
-import { Children, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useChatMessages } from "../hooks/useChats";
+import { getUserProfile } from "../api/UserApi";
+import { sendMessage } from "../api/ChatApi";
 
 const Header = ({name, profilePic})=>{
     return (
         <div className="bg-blue-100 flex justify-between items-center p-4 text-gray-800 border-b border-gray-300">
             <div className="flex items-center gap-2">
-                <img src={profilePic} className="size-8 cursor-pointer" alt="Profile"/>
+                <img src={profilePic ? profilePic : defaultProfilePic} className="size-8 cursor-pointer" alt="Profile"/>
                 <p className="cursor-pointer">{name}</p>
             </div>
             <div className="flex justify-center items-center rounded-lg hover:bg-sky-700 p-2 cursor-pointer">
@@ -32,15 +36,25 @@ const ChatBubble = ({text, time, isSender})=>{
 };
 
 
-const Chats = ({chatList})=>{
+const Chats = ({uid})=>{
+    const { messages, loadMore, loadingMore, hasMore } = useChatMessages(uid);
+    const handleScroll = (e) => {
+    if (e.target.scrollTop < 100 && !loadingMore && hasMore) {
+      loadMore();
+    }
+    };
+    if(messages.length){
+        console.log("Messages loaded:", messages);
+    }
+
     return (
-        <div className="flex flex-col flex-grow bg-yellow-100 overflow-y-auto transparent-scrollbar">
-            <ChatBubble text="
-Lorem ipsum dolor, sit amet consectetur adipisicing elit. Deleniti maiores itaque amet esse expedita accusantium hic ad officiis quidem unde animi, temporibus aperiam laudantium laboriosam quasi dolorem, molestiae illum quo, quis laborum assumenda beatae? Laborum, tempore corrupti praesentium in impedit illum eum commodi ipsam voluptate non quod fuga! Officia ea aspernatur animi dolores ratione atque, sunt deserunt explicabo odit autem laborum ipsam fugit nesciunt aliquid quas debitis incidunt architecto, voluptatibus exercitationem accusamus? Non, iusto in voluptatum cumque placeat incidunt beatae! Quia obcaecati amet dolore, similique, iure pariatur rem minus quo vero velit, earum ad aliquam recusandae voluptate culpa quisquam fuga necessitatibus eaque molestias? Ipsum sit iusto sapiente libero voluptatibus error dolorum animi nobis, rerum similique aut corporis possimus? Officia vitae quos architecto aliquid tenetur cupiditate unde repudiandae cumque! Nesciunt, voluptatem vero laudantium dolor ea numquam perspiciatis tenetur tempora ullam delectus iure maxime, reprehenderit saepe laboriosam ipsam. Minus soluta nemo itaque impedit, doloribus quia fuga! Voluptas non sapiente est quod adipisci quas quibusdam similique nisi amet, omnis ipsa ullam fugiat neque illum dicta molestiae accusantium repellendus nulla. Maxime, explicabo in iste nam obcaecati quaerat rem quas repellat veritatis excepturi architecto quidem error quos qui sint fugit delectus molestias voluptatibus dignissimos porro, quibusdam praesentium rerum repellendus ipsam. Dicta itaque recusandae libero cum soluta magni. Labore repellendus dolore itaque debitis optio? Iusto, qui! Labore optio ipsa cumque repellat, error quaerat perferendis sint! Repellat nam voluptatibus sint necessitatibus harum magnam accusantium alias atque exercitationem enim. Laudantium sapiente omnis quidem fugit natus quasi blanditiis totam numquam vel impedit ipsa voluptate assumenda, quo voluptatum temporibus pariatur eligendi eaque. Exercitationem dolorum similique distinctio. Nisi quis officiis facilis, cupiditate soluta nemo similique amet maxime cumque molestias architecto veniam, ipsum perspiciatis quia eveniet sunt porro, quam quasi! Libero fugiat ad optio doloribus! Doloribus incidunt autem eveniet consequuntur cumque libero eos tenetur vitae commodi ea fuga eius laborum debitis facere praesentium, quis inventore impedit, quasi quibusdam nisi repellat. Esse unde quam quia perspiciatis quasi accusantium, alias culpa. Officia corporis perferendis voluptates eveniet suscipit sed, sint quo error corrupti animi nemo earum esse cupiditate sit delectus nobis ratione! Impedit beatae maxime, ipsam laborum rerum alias?
-            " time="10:00 AM" isSender={true} />
-            <ChatBubble text="
-Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ducimus ab ipsa maxime repellendus. A animi quaerat sed doloribus dolor modi expedita aliquid numquam molestiae, magnam, quasi nihil dolorem molestias quo dolore amet vero architecto aperiam corrupti necessitatibus accusantium dignissimos quam unde quos! Labore sed adipisci recusandae ad illo. Quasi id non quibusdam porro facilis eligendi voluptates vitae, perspiciatis tenetur esse ullam beatae cupiditate fugiat velit cum nisi. Assumenda voluptatum, aut quibusdam facilis similique iste voluptatibus expedita provident optio aliquam minus nihil libero ullam, dolores illum sapiente quo. Doloremque quod rerum dolores. Voluptatem aliquam cumque, minus consequatur quae eaque consequuntur eum neque. Minus debitis libero voluptate, praesentium veniam maxime quasi modi tempore neque, voluptatem, a rem amet blanditiis voluptatum nulla doloremque nesciunt vitae repellendus eveniet! Corporis quis, esse maxime ut cupiditate quod illum illo vel harum architecto, ullam quibusdam? Accusamus atque, earum sequi laudantium magnam exercitationem facere, amet minima aut eveniet suscipit aspernatur animi, facilis ipsum ad saepe distinctio impedit beatae sit pariatur cupiditate inventore odio. Quis voluptates qui ipsum reprehenderit nemo, quam quaerat tempore ex eveniet deleniti asperiores excepturi minima totam, fugiat ipsam labore iste animi delectus velit nihil eius. Neque ex, pariatur consequuntur laborum natus, quos, quibusdam hic veniam illum consectetur numquam nihil. Aspernatur, unde! Officia reiciendis repellat alias similique natus voluptatem, labore distinctio suscipit. Suscipit quam at labore vero dolores cum officiis blanditiis itaque autem quibusdam optio ratione nulla eius nihil sequi, quod necessitatibus quasi aliquid quas tenetur pariatur doloremque unde perferendis iste. Reprehenderit, expedita magnam? Reiciendis eius, sint voluptas nobis sunt natus odio debitis minus at ipsa nemo. Praesentium illo ipsam consectetur aliquid ut unde veritatis itaque laudantium assumenda, cum, omnis, cupiditate corrupti nihil hic quae reiciendis dolore sit explicabo. Praesentium alias dolore sint incidunt dolor neque facere delectus debitis, numquam porro explicabo! Voluptatum debitis esse fugit repellat, mollitia unde natus dolorem nesciunt perferendis provident recusandae labore! Veritatis maxime, provident laborum iure id alias quas sed sequi eius libero, tenetur placeat laboriosam asperiores culpa ipsa sapiente illo sunt. Aliquid quo voluptatem similique! Doloremque minima aperiam amet quaerat deleniti excepturi totam!
-            I'm good, thanks! How about you?" time="10:01 AM" isSender={false} />
+        <div className="flex flex-col-reverse flex-grow bg-yellow-100 overflow-y-auto transparent-scrollbar" onScroll={handleScroll}>
+            {messages.map((msg, index) => (
+                <ChatBubble text={msg.message} 
+                key={msg.id}
+                timestamp = {msg.timestamp}
+                isSender={msg.sender !== uid}
+                />))}
         </div>
     );
 };
@@ -74,7 +88,7 @@ const DropUpMenu = ({imgSource, imgAlt,children})=>{
     );
 }
 
-const InputChat = ()=>{
+const InputChat = ({uid})=>{
     const textareaRef = useRef(null);
 
     const [textMessage, setTextMessage] = useState("");
@@ -86,8 +100,30 @@ const InputChat = ()=>{
         setTextMessage(e.target.value);
     };
 
+    const handleSendMessage = () =>{
+        if(textMessage.trim() !== "") {
+            // Here you would send the message
+            console.log("Sending message:", textMessage, "to user:", uid);
+            sendMessage(textMessage, uid).catch((error) => {
+                console.error("Error sending message:", error)});
+            console.log("Sending message:", textMessage);
+            setTextMessage(""); // Clear the input after sending
+            textareaRef.current.style.height = 'auto'; // Reset height after sending
+        }
+    }
+
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Prevent default Enter key behavior
+            if (textMessage.trim() !== "") {
+                handleSendMessage();
+            }
+        }
+    }
+
     return (
-        <div className="flex items-end p-2 pb-3 bg-blue-100 border-t border-gray-300">
+        <div 
+        className="flex items-end p-2 pb-3 bg-blue-100 border-t border-gray-300">
             <DropUpMenu imgSource={emojiIcon} imgAlt="Emoji">
 
                 <div className="py-1 w-40">
@@ -118,12 +154,15 @@ const InputChat = ()=>{
             <textarea 
                 ref={textareaRef}
                 onInput={handleInput}
-                text={textMessage}
+                value={textMessage}
+                onKeyDown={handleKeyDown}
             rows="1" type="text" className="max-h-48 p-2 bg-blue-100 w-full overflow-auto resize-none border-none focus:outline-none hide-scrollbar" placeholder="Type a message..." />
 
             </div>
             { textMessage.trim()!=="" ?
-            <button className="ml-2 p-2 bg-blue-400 text-white rounded-lg hover:bg-blue-600">
+            <button className="ml-2 p-2 bg-blue-400 text-white rounded-lg hover:bg-blue-600"
+                onClick={handleSendMessage}
+            >
                 <img src={sendMessageIcon} alt="Send" className="size-5" />
             </button>
             :
@@ -136,11 +175,31 @@ const InputChat = ()=>{
 }
 
 
-const ShowChats = ()=>{
-    return (<div    className="w-[0%] md:w-3/4 h-screen bg-blue-100 fixed right-0 flex flex-col overflow-hidden">
-        <Header name={"Akram Khan"} profilePic={defaultProfilePic}/>
-        <Chats chatList={[]}/>
-        <InputChat/>
+const ShowChats = ({priority})=>{
+    const uid = useParams().uid;
+    const [profileData, setProfileData] = useState({displayName: "Loading...", profilePic: defaultProfilePic});
+    useEffect(() => {
+        if (uid) {
+            getUserProfile(uid).then((profile) => {
+                setProfileData(profile);
+            }).catch((error) => {
+                console.error("Error fetching user profile:", error);
+            });
+        }
+    }, [uid]);
+    if(!uid){
+        return (
+            <div className={`${priority===2 ? "w-screen" : "w-0"} md:w-3/4 h-screen bg-blue-100 fixed right-0 flex flex-col overflow-hidden`}>
+                <Header name={"Select a chat"} profilePic={defaultProfilePic}/>
+                <Chats />
+                <InputChat/>
+            </div>
+        );
+    }
+    return (<div    className={`${priority===2 ? "w-screen" : "w-0"} md:w-3/4 h-screen bg-blue-100 fixed right-0 flex flex-col overflow-hidden`}>
+        <Header name={profileData.displayName} profilePic={profileData.profilePic}/>
+        <Chats uid={uid}/>
+        <InputChat uid={uid}/>
     </div>);
 }
 
